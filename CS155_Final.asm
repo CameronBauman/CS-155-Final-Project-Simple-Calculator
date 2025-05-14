@@ -26,21 +26,21 @@ LOOP
     
     ; This code loads the ASCII of y into R1
     ; This for uppercase Y
-    LD R1, YESCAPS
-    NOT R1, R1
-    ADD R1, R1, #1
-    ADD R1, R0, R1
-    BRz LOOP
+    ; LD R1, YESCAPS
+    ; NOT R1, R1
+    ; ADD R1, R1, #1
+    ;n ADD R1, R0, R1
+    ; BRz LOOP
     
     ; This for lowercase y
-    LD R1, YESLOWER
-    NOT R1, R1
-    ADD R1, R1, #1
-    ADD R1, R0, R1
-    BRz LOOP
+    ; LD R1, YESLOWER
+    ; NOT R1, R1
+    ; ADD R1, R1, #1
+    ; ;ADD R1, R0, R1
+    ; BRz LOOP
     
     ; Program End
-    JSR NEWLINEPRINT
+    ;JSR NEWLINEPRINT
     TRAP x25
     
 ; ASCII for y for the continue prompt
@@ -57,12 +57,13 @@ MENU
     
     RET
 
-MENUMSG .STRINGZ "Enter operator (+, -, /, *): "
+MENUMSG .STRINGZ "\nEnter operator (+, -, /, *): "
     
 ; USERINPUT stuff ______________________________________________________
 USERINPUT
     ; Prompts user input
     TRAP x20
+    TRAP x21
     
     RET
 
@@ -96,9 +97,9 @@ ADDING
     RET
     
 ; Addition ASCII
-ADDFIRSTNUM .STRINGZ "Enter first number (0-9): "
-ADDSECNUM .STRINGZ "Enter second number (0-9): "
-ADDRESULT .STRINGZ "Addition result: "
+ADDFIRSTNUM .STRINGZ "\nEnter first number (0-9): "
+ADDSECNUM .STRINGZ "\nEnter second number (0-9): "
+ADDRESULT .STRINGZ "\nAddition result: "
 
 ; Subtraction stuff ______________________________________________________
 SUBTRACT
@@ -150,9 +151,9 @@ SUBTRACT
     RET
     
 ; Subtraction ASCII
-SUBFIRSTNUM .STRINGZ "Enter first number (0-9): "
-SUBSECNUM .STRINGZ "Enter second number (0-9): "
-SUBRESULT .STRINGZ "Subtraction result: "
+SUBFIRSTNUM .STRINGZ "\nEnter first number (0-9): "
+SUBSECNUM .STRINGZ "\nEnter second number (0-9): "
+SUBRESULT .STRINGZ "\nSubtraction result: "
 
 ; OPERATOR stuff ______________________________________________________
 OPERATOR
@@ -198,7 +199,7 @@ DIVIDE .FILL x002F
 ; ASCII for *
 MULT .FILL x002A
 
-ERRMSG .STRINGZ "Invalid operator. Please try again."
+ERRMSG .STRINGZ "\nInvalid operator. Please try again."
 
 ; Division stuff ______________________________________________________
 DIVISION
@@ -250,10 +251,10 @@ DIVISION
     RET
 
 ; Division ASCII
-DIVFIRSTNUM .STRINGZ "Enter first number (0-9): "
-DIVSECNUM .STRINGZ "Enter second number (0-9): "
-DIVIDEZERO .STRINGZ "Error: You cannot divide by 0."
-DIVRESULT .STRINGZ "Division result: "
+DIVFIRSTNUM .STRINGZ "\nEnter first number (0-9): "
+DIVSECNUM .STRINGZ "\nEnter second number (0-9): "
+DIVIDEZERO .STRINGZ "\nError: You cannot divide by 0."
+DIVRESULT .STRINGZ "\nDivision result: "
 
 ; Multiplication stuff ______________________________________________________
 MULTIPLY
@@ -301,14 +302,15 @@ MULTIPLY
     RET
 
 ; Multiplication ASCII
-MULTFIRSTNUM .STRINGZ "Enter first number (0-9): "
-MULTSECNUM .STRINGZ "Enter second number (0-9): "
-MULTRESULT .STRINGZ "Multiplication result: "
+MULTFIRSTNUM .STRINGZ "\nEnter first number (0-9): "
+MULTSECNUM .STRINGZ "\nEnter second number (0-9): "
+MULTRESULT .STRINGZ "\nMultiplication result: "
 
 ; USERNUM stuff ______________________________________________________
 USERNUM
     ; Reads ASCII user imputed and changes it into its numeric value
     TRAP x20
+    TRAP x21
     ; Two's complimenting ASCII zero to make the R1 value
     ; which holds the binary value of ASCIIZERO negative
     LD R1, ASCIIZERO
@@ -373,15 +375,15 @@ CONTINUE
     RET
 
 ; Continue ASCII
-CONTINUEPROMPT .STRINGZ "Perform another calculation? (Y/N): "
+CONTINUEPROMPT .STRINGZ "\nPerform another calculation? (Y/N): "
 
 ; NEWLINE stuff ______________________________________________________
-NEWLINEPRINT
-    LD R0, NEWLINE
-    TRAP x21
+; NEWLINEPRINT
+    ; LD R0, NEWLINE
+    ; TRAP x21
     
-    RET
+    ; RET
 ; Make a new line
-NEWLINE .FILL x000A
+; NEWLINE .FILL x000A
 
 .END
