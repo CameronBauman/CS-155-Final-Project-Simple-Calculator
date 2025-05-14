@@ -17,7 +17,6 @@ LOOP
     ; Asks for user input
     JSR USERINPUT
     
-    
     ; Asks for which operation they want to do
     JSR OPERATOR
     
@@ -26,18 +25,18 @@ LOOP
     
     ; This code loads the ASCII of y into R1
     ; This for uppercase Y
-    ; LD R1, YESCAPS
-    ; NOT R1, R1
-    ; ADD R1, R1, #1
-    ;n ADD R1, R0, R1
-    ; BRz LOOP
+    LD R1, YESCAPS
+    NOT R1, R1
+    ADD R1, R1, #1
+    ADD R1, R0, R1
+    BRz LOOP
     
     ; This for lowercase y
-    ; LD R1, YESLOWER
-    ; NOT R1, R1
-    ; ADD R1, R1, #1
-    ; ;ADD R1, R0, R1
-    ; BRz LOOP
+    LD R1, YESLOWER
+    NOT R1, R1
+    ADD R1, R1, #1
+    ADD R1, R0, R1
+    BRz LOOP
     
     ; Program End
     ;JSR NEWLINEPRINT
