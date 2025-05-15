@@ -8,7 +8,13 @@
 
 .ORIG x3000
 
+; Initialize stack pointer (R6)
+LD R6, STACK
+
 ; Calculator Hub ______________________________________________________
+; This is the Hub for the calculator
+; This code branches out into the many other functions that this code contains
+; Everything comes back to this code when it is done
 LOOP
     ; Displays the menu for operations
     ; Enter operator (+, -, /, *): 
@@ -39,7 +45,6 @@ LOOP
     BRz LOOP
     
     ; Program End
-    ;JSR NEWLINEPRINT
     TRAP x25
     
 ; ASCII for y for the continue prompt
@@ -47,27 +52,50 @@ LOOP
 YESCAPS .FILL x0059
 ; ASCII code for lowercase y
 YESLOWER .FILL x0079
+; Stack 
+STACK .FILL xFE00
 
 ; MENU stuff ______________________________________________________
+; This menu prints out the menu for operation selection
 MENU
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Prints the menu message
     LEA R0, MENUMSG
     TRAP x22
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
 
 MENUMSG .STRINGZ "\nEnter operator (+, -, /, *): "
     
 ; USERINPUT stuff ______________________________________________________
+; This code accepts an keybord input for operations
 USERINPUT
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Prompts user input
     TRAP x20
     TRAP x21
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
 
 ; Addition stuff ______________________________________________________
+; this code takes 2 integers between 0-9 to perform addition
 ADDING
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Display prompt for first num
     LEA R0, ADDFIRSTNUM
     TRAP x22
@@ -92,7 +120,10 @@ ADDING
     TRAP x22
     JSR PRINT
     
-    
+
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
     
 ; Addition ASCII
@@ -101,7 +132,11 @@ ADDSECNUM .STRINGZ "\nEnter second number (0-9): "
 ADDRESULT .STRINGZ "\nAddition result: "
 
 ; Subtraction stuff ______________________________________________________
+; this code takes 2 integers between 0-9 to perform subtraction
 SUBTRACT
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
 
     ; Display prompt for first num
     LEA R0, SUBFIRSTNUM
@@ -130,23 +165,27 @@ SUBTRACT
 
     ; Compute the operation
     ADD R4, R4, R3
-    ; If result is not negative
-    BRzp SUBPRINT
+    
+    ; Display Result
+    LEA R0, SUBRESULT
+    TRAP x22
     
     ; If result is negative
+    ADD R5, R4, #0
+    BRzp SUBPOSITIVE
+    
+    ; Print minus sign and convert to positive
     LD R0, MINUS
     TRAP x21
-    ; Turn result positive
     NOT R4, R4
-    ADD R4, R4,  #1
+    ADD R4, R4, #1
     
+SUBPOSITIVE
+    JSR PRINT
     
-    SUBPRINT
-        ; Display Result
-        LEA R0, SUBRESULT
-        TRAP x22
-        JSR PRINT
-    
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
     
 ; Subtraction ASCII
@@ -155,7 +194,14 @@ SUBSECNUM .STRINGZ "\nEnter second number (0-9): "
 SUBRESULT .STRINGZ "\nSubtraction result: "
 
 ; OPERATOR stuff ______________________________________________________
+; This is the Hub for operation detection
+; Depending on users input for operations
+; This code will filter where the PC should jump to
 OPERATOR
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Checks to see if ASCII + was inputed
     LD R1, PLUS
     NOT R1, R1
@@ -187,6 +233,9 @@ OPERATOR
     LEA R0, ERRMSG
     TRAP x22
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
     
 ; ASCII for +
@@ -201,7 +250,12 @@ MULT .FILL x002A
 ERRMSG .STRINGZ "\nInvalid operator. Please try again."
 
 ; Division stuff ______________________________________________________
+; this code takes 2 integers between 0-9 to perform division
 DIVISION
+ ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Display prompt for first num
     LEA R0, DIVFIRSTNUM
     TRAP x22
@@ -226,27 +280,38 @@ DIVISION
     AND R4, R4, #0
     
     ; Setting up division before DIVIDELOOP
-    NOT R6, R3
-    ADD R6, R6, #1
+    ; Changed R6 to R5
+    NOT R5, R3
+    ADD R5, R5, #1
     
     DIVIDELOOP
-        ADD R5, R2, R6
+        ; Changed R5 to R1
+        ADD R1, R2, R5
         BRn DIVIDEFINISH
-        ADD R2, R5, #0
+        ADD R2, R1, #0
         ADD R4, R4, #1
         BR DIVIDELOOP
-        
+
+    DIVZERO
+        LEA R0, DIVIDEZERO
+        TRAP x22
+
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
+
+    RET
+
     DIVIDEFINISH
          LEA R0, DIVRESULT
          TRAP x22
          JSR PRINT
     
-    RET
     
-    DIVZERO
-        LEA R0, DIVIDEZERO
-        TRAP x22
-        
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
+
     RET
 
 ; Division ASCII
@@ -256,7 +321,12 @@ DIVIDEZERO .STRINGZ "\nError: You cannot divide by 0."
 DIVRESULT .STRINGZ "\nDivision result: "
 
 ; Multiplication stuff ______________________________________________________
+; this code takes 2 integers between 0-9 to perform multiplication
 MULTIPLY
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Display prompt for first num
     LEA R0, MULTFIRSTNUM
     TRAP x22
@@ -280,7 +350,7 @@ MULTIPLY
     ADD R1, R3, #0
     BRz MULTIPLYZERO
     
-    ; Zero out R4 before calculations
+    ; Getting R4 and R1 ready for calculations
     AND R4, R4, #0
     ADD R1, R3, #0
     
@@ -298,6 +368,9 @@ MULTIPLY
         TRAP x22
         JSR PRINT
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
 
 ; Multiplication ASCII
@@ -306,7 +379,12 @@ MULTSECNUM .STRINGZ "\nEnter second number (0-9): "
 MULTRESULT .STRINGZ "\nMultiplication result: "
 
 ; USERNUM stuff ______________________________________________________
+; This code accepts a keyboard input from the user expecting a number between 0-9
 USERNUM
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Reads ASCII user imputed and changes it into its numeric value
     TRAP x20
     TRAP x21
@@ -318,71 +396,88 @@ USERNUM
     ; add the values together
     ADD R0, R0, R1
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
 
 ; PRINT stuff ______________________________________________________
+; This code prints out the results of the arithmetic operations
 PRINT
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Checking if R4 is single digit
     ADD R5, R4, #-10
     BRn SINGLEDIGIT
     ; if it is not single digit prepare more registers
     ; for printing
-    AND R6, R6, #0
-    ADD R7, R4, #0
+    AND R1, R1, #0 
+    ADD R5, R4, #0 
     
     MULTIPLEDIGITS
-        ; Substracts 10 from R7 and puts result into R5
-        ; and checks to see if we have finished with the double digits
-        ADD R5, R7, #-10
+        ; Substracts 10 from R5 and puts result into R0
+        ADD R0, R5, #-10
         BRn FINISHPRINT
-        ; if not add 1 to R6 which is for the tens digit
+        ; if not add 1 to R1 which is for the tens digit
         ; and loop
-        ADD R6, R6, #1
-        ADD R7, R5, #0
+        ADD R1, R1, #1
+        ADD R5, R0, #0
         BR MULTIPLEDIGITS
     
     FINISHPRINT
-        ; converts both R6 and R7 to ASCII and prints
-        ; First load ASCIIZERO to R1
-        LD R1, ASCIIZERO
+        ; converts both R1 and R5 to ASCII and prints
+        ; First load ASCIIZERO to R0
+        LD R0, ASCIIZERO
         ; Print tens value
-        ADD R0, R6, R1
+        ADD R0, R1, R0
         TRAP x21
         ; Print ones value
-        ADD R0, R7, R1
+        LD R0, ASCIIZERO
+        ADD R0, R5, R0
         TRAP x21
         
-        RET
+
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
+    RET
 
     SINGLEDIGIT
-        LD R1, ASCIIZERO
-        ADD R0, R4, R1
+        LD R0, ASCIIZERO
+        ADD R0, R4, R0
         TRAP x21
         
-        RET
+
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
+    RET
         
 ; ASCII code for 0
 ASCIIZERO .FILL x0030
 
 ; CONTINUE stuff ______________________________________________________
+; This code is for the Hub loop which loops when user presses either y or Y
+; This code only prints the string for performing another calculation and 
+; allows user to give a keyboard input
 CONTINUE
+    ; Save return address to the stack
+    ADD R6, R6, #-1
+    STR R7, R6, #0
+    
     ; Asks if user wants to continue and prompts user for input
     LEA R0, CONTINUEPROMPT
     TRAP x22
     TRAP x20
     
+    ; Restore return address and return
+    LDR R7, R6, #0
+    ADD R6, R6, #1
     RET
 
 ; Continue ASCII
 CONTINUEPROMPT .STRINGZ "\nPerform another calculation? (Y/N): "
-
-; NEWLINE stuff ______________________________________________________
-; NEWLINEPRINT
-    ; LD R0, NEWLINE
-    ; TRAP x21
-    
-    ; RET
-; Make a new line
-; NEWLINE .FILL x000A
 
 .END
